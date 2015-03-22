@@ -12,8 +12,8 @@
 			import mx.collections.ArrayCollection;
 			import mx.events.FlexEvent;
 			
-			
-			
+			import com.adobe.serialization.json.*;
+						
 			[Bindable]
 			private var msgBuffer:ArrayCollection;
 			private var websock:WebSocket;
@@ -25,8 +25,13 @@
 			{
 				msgBuffer = new ArrayCollection([]);
 				
+				sessionId = null;
+				loadPolicyFile("xmlsocket://127.0.0.1:843");
+				
+				
 				//websock = new WebSocket(this, "ws://192.168.1.185:3000/socket.io/flashsocket","");
 				websock = new WebSocket(this, "ws://127.0.0.1:3000/socket.io/flashsocket" ,"");
+				//websock = new WebSocket(this, "ws://127.0.0.1:3000" ,"");
 				websock.addEventListener("open", onOpen);
 				websock.addEventListener("close", onClose);
 				websock.addEventListener("message", onMessage);				
@@ -57,23 +62,88 @@
 				messages.verticalScrollPosition = messages.maxVerticalScrollPosition;
 			}
 			
-			protected function onOpen(event:Event):void
+			public function onOpen(e:Event):void
 			{
-				// TODO Auto-generated method stub
-				
+				log("websocket connected");
+				//websock.send(frame+'17'+frame+"USERNAME:username");
 			}
 			
-			protected function onClose(event:Event):void
+			public  function onClose(e:Event):void
 			{
-				// TODO Auto-generated method stub
-				
+				log("websocket disconnected");
 			}
 			
-			protected function onMessage(event:Event):void
-			{
-				// TODO Auto-generated method stub
+			public function onMessage(e:Event):void
+			{			
+				var msgs:Array = websock.readSocketData();
 				
+				for each (var msg:String in msgs) {
+					
+					//msg = decodeURIComponent(msg);
+					
+					log("received string: "+msg);
+					if (msg.substr(0, 3) == frame)
+					{
+						var m:Array = msg.split(frame);
+						if (sessionId == null) {
+							sessionId = m[2];
+							log("session id= " + sessionId);
+						}
+						else
+						{
+							log(" m[2] = " +m[2]); 
+							if (m[2].substr(0, 3) == '~h~')
+							{
+								log("heartbeat: " + msg);
+								sendHeartBeat(m[2].substr(3));
+							}
+							else
+								if (m[2].substr(0, 3) == '~j~')
+								{
+									log("json: " + msg);
+									parseMsg(m[2].substr(3));
+								}
+								else
+								{
+									parseMsg(m[2]);
+									log ("message: " + m[2]);
+								}  					  
+						}
+					}
+					
+				}
 			}
+			
+			public function parseMsg(s:String):void
+			{
+				//var msg:Object = JSON.decode(s);				
+				var msg:Object = com.adobe.serialization.json.JSON.decode(s);
+				
+				
+				
+				if (msg.announcement != null) {
+					trace("announcement :" + msg.announcement);
+					addToList(msg.announcement);
+				}
+				else
+					if (msg.message != null)
+					{
+						addToList(msg.message[0]+" :"+msg.message[1]);
+					}
+					else
+						
+						if (msg.buffer != null) {
+							for each (var o:Object in msg.buffer) {
+								addToList(o.message[0]+" : "+o.message[1]);
+							}
+						}
+			}
+			
+			public function sendHeartBeat(num:String):void
+			{
+				var strnum:int = 3 + num.length;
+				websock.send(frame + strnum.toString() + frame+ '~h~' + num);
+			}			
 			
 			public function getOrigin():String {
 				return ("http://127.0.0.1");
@@ -86,6 +156,22 @@
 			
 			public function getCallerHost():String {
 				return ("http://127.0.0.1");
+			}
+			
+			public function fatal(str:String):void
+			{
+				trace(str);
+			}
+			
+			public function error(str:String):void
+			{
+				trace(str);
+			}
+			
+			public function loadPolicyFile(url:String):void
+			{
+				log("policy file: " + url);
+				Security.loadPolicyFile(url);
 			}
 			
 		]]>
