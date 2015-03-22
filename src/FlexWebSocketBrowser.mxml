@@ -2,7 +2,42 @@
 <s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
 			   xmlns:s="library://ns.adobe.com/flex/spark" 
 			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			
+			
+			
+			[Bindable]
+			private var msgBuffer:ArrayCollection;
+			
+			public function init():void {
+				msgBuffer = new ArrayCollection([]);
+			
+			}	
+			protected function msgbox_keyDownHandler(event:KeyboardEvent):void {
+				// TODO Auto-generated method stub
+				
+			}		
+			protected function sendMessage(event:MouseEvent):void {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
+	
+
+	<mx:VBox width="100%" height="100%">	
+		<mx:List id="messages" width="100%" height="400" dataProvider="{msgBuffer}" />
+		<mx:HBox>
+			<s:TextInput id="msgbox" height="50" width="650" keyDown="msgbox_keyDownHandler(event)" />
+			<mx:Button id="btn" height="50" width="50" click="sendMessage(event)" />
+		</mx:HBox>
+	</mx:VBox>
 </s:Application>
