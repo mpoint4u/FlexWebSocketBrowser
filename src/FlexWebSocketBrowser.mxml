@@ -2,11 +2,15 @@
 <s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
-			   minWidth="955" minHeight="600">
+			   minWidth="955" minHeight="600"
+			   
+			   creationComplete="init(event)"
+			   >
 	
 	<fx:Script>
 		<![CDATA[
 			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
 			
 			
 			
@@ -15,11 +19,23 @@
 			private var websock:WebSocket;
 			private var sessionId:String;
 			private var frame:String = '~m~';			
+
 			
-			public function init():void {
+			protected function init(event:FlexEvent):void
+			{
 				msgBuffer = new ArrayCollection([]);
+				
+				//websock = new WebSocket(this, "ws://192.168.1.185:3000/socket.io/flashsocket","");
+				websock = new WebSocket(this, "ws://127.0.0.1:3000/socket.io/flashsocket" ,"");
+				websock.addEventListener("open", onOpen);
+				websock.addEventListener("close", onClose);
+				websock.addEventListener("message", onMessage);				
+			}			
 			
-			}	
+/* 			public function init():void {
+				msgBuffer = new ArrayCollection([]);			
+			} */
+			
 			protected function msgbox_keyDownHandler(event:KeyboardEvent):void {
 				if (event.keyCode == Keyboard.ENTER) sendMessage();
 				
@@ -39,6 +55,37 @@
 			{
 				msgBuffer.addItem(s);
 				messages.verticalScrollPosition = messages.maxVerticalScrollPosition;
+			}
+			
+			protected function onOpen(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			protected function onClose(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			protected function onMessage(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public function getOrigin():String {
+				return ("http://127.0.0.1");
+			}
+			
+			public function log(str:String):void
+			{
+				trace(str);
+			}
+			
+			public function getCallerHost():String {
+				return ("http://127.0.0.1");
 			}
 			
 		]]>
