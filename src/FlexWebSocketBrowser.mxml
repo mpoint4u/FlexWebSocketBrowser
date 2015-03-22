@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
-			   xmlns:s="library://ns.adobe.com/flex/spark" 
-			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600">
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   minWidth="955" minHeight="600">
 	
 	<fx:Script>
 		<![CDATA[
@@ -11,6 +12,9 @@
 			
 			[Bindable]
 			private var msgBuffer:ArrayCollection;
+			private var websock:WebSocket;
+			private var sessionId:String;
+			private var frame:String = '~m~';			
 			
 			public function init():void {
 				msgBuffer = new ArrayCollection([]);
@@ -21,8 +25,20 @@
 				
 			}		
 			protected function sendMessage(event:MouseEvent):void {
-				// TODO Auto-generated method stub
-				
+				sendMsg(msgbox.text); 
+				msgbox.text="";		
+			}
+			
+			public function sendMsg(m:String):void
+			{
+				websock.send(frame + m.length + frame + m);
+				addToList("me : " + m);
+			}
+			
+			private function addToList(s:String):void
+			{
+				msgBuffer.addItem(s);
+				messages.verticalScrollPosition = messages.maxVerticalScrollPosition;
 			}
 			
 		]]>
@@ -34,10 +50,10 @@
 	
 
 	<mx:VBox width="100%" height="100%">	
-		<mx:List id="messages" width="100%" height="400" dataProvider="{msgBuffer}" />
+		<mx:List id="messages" width="100%" height="400" dataProvider="{msgBuffer}"/>
 		<mx:HBox>
-			<s:TextInput id="msgbox" height="50" width="650" keyDown="msgbox_keyDownHandler(event)" />
-			<mx:Button id="btn" height="50" width="50" click="sendMessage(event)" />
+			<s:TextInput id="msgbox" width="650" height="50" keyDown="msgbox_keyDownHandler(event)"/>
+			<mx:Button id="btn" width="50" height="50" click="sendMessage(event)"/>
 		</mx:HBox>
 	</mx:VBox>
 </s:Application>
